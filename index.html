@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	    <title>MQTT JavaScript Client Example</title>
+	    <!-- Latest compiled and minified CSS - add here as needed -->
+	</head>
+	<body onload="valor()">
+	    <!-- HTML to display MQTT topic values ------------------------------------------------->
+		<div><strong>IOT Server</strong></div><br>
+		<textarea style="resize:none; border: none" readonly rows="1" cols="10">User Id</textarea>
+		<textarea style="resize:none; border: none" readonly rows="1" cols="10">Board Id</textarea><br/>
+		<textarea style="resize:none" id='userId' rows="1" cols="10">User</textarea>
+		<textarea  style="resize:none" id='boarId' rows="1" cols="10">rp</textarea><br/>
+		<button id="led" onclick="led()">led</button>
+		<h1 id="led_state">off</h1>
+		<button id="led2" onclick="led2()">led2</button>
+		<h1 id="led_state2">off</h1>
+		<button id="led3" onclick="led3()">led3</button>
+		<h1 id="led_state3">off</h1>
+		<h1>sensor</h1>
+		<h1 id="sensor_val">0</h1>
+		<!-- mosquitto MQTT -------------------------------------------------------------------->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+		<!-- jQuery ---------------------------------------------------------------------------->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+		<!-- Custom MQTT client for this example ----------------------------------------------->
+		
+		<script>
+
+  // Create a client instance
+  //client = new Paho.MQTT.Client("postman.cloudmqtt.com", 14970);
+  
+  client = new Paho.MQTT.Client("postman.cloudmqtt.com", 31098, "web_" + parseInt(Math.random() * 100, 10));
+
+  // set callback handlers
+  client.onConnectionLost = onConnectionLost;
+  client.onMessageArrived = onMessageArrived;
+  var options = {
+    useSSL: true,
+    userName: "botstbxk",
+    password: "bDKSMnTpsSoO",
+    onSuccess:onConnect,
+    onFailure:doFail
+  }
+
+  // connect the client
+  client.connect(options);
+   
+  // called when the client connects
+  function onConnect() {
+    // Once a connection has been made, make a subscription and send a message.
+    console.log("onConnect");
+	
+    client.subscribe("/cloudmqtt");
+    message = new Paho.MQTT.Message("ll:Hello: CloudMQTT");
+    message.destinationName = "/cloudmqtt";
+    
+	
+  }
+
+  function doFail(e){
+    console.log(e);
+	
+  }
+
+  // called when the client loses its connection
+  function onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+      console.log("onConnectionLost:"+responseObject.errorMessage);
+    }
+  }
+
+  // called when a message arrives
+  function onMessageArrived(message) {
+    console.log("onMessageArrived:"+message.payloadString);
+	
+	doAction(message.payloadString);
+  }
+  
+    // called when a message arrives
+  function sendMessage(msg) {
+    message = new Paho.MQTT.Message(msg);
+    message.destinationName = "/cloudmqtt";
+    client.send(message);
+	
+  }
+
+    // called when a message arrives
+    function led() {
+    //boarId=document.getElementById("boarId").value;
+	//userIdId=document.getElementById("userId").value;
+    sendMessage('led')
+  }
+    function led2() {
+    //boarId=document.getElementById("boarId").value;
+	//userIdId=document.getElementById("userId").value;
+    sendMessage('led2')
+  }
+	function led3() {
+    //boarId=document.getElementById("boarId").value;
+	//userIdId=document.getElementById("userId").value;
+    sendMessage('led3')
+  }
+  
+  // called when a message arrives
+  //myName='leo'
+  //led_state=true
+  function valor(){
+  
+  ledstate.innerHTML=localStorage.led_state;
+  ledstate2.innerHTML=localStorage.led_state2;
+  ledstate3.innerHTML=localStorage.led_state3;
+  
+  }
+  
+  function doAction(msg) {
+ 
+  	val_sen=document.getElementById("sensor_val");
+	ledstate=document.getElementById("led_state");
+	ledstate2=document.getElementById("led_state2");
+	ledstate3=document.getElementById("led_state3");
+	
+	n=msg.split(':')[0];
+	m=msg.split(':')[1];
+	if(n=='led'){
+		if(m=='on'){
+		ledstate.innerHTML='on';  ///IMPRIMO PRENDIDO EN PAGINA WEB
+		localStorage.led_state='on';   /// GUARDO EL ESTADO 
+		//document.getElementById('led_state').innerHTML=localStorage.led_state;
+		//ledstate.innerHTML=localStorage.led_state;	
+		}else{
+			ledstate.innerHTML='off';
+			localStorage.led_state='off';
+			//document.getElementById('led_state').innerHTML=localStorage.led_state;
+			//edstate.innerHTML=localStorage.led_state;	
+		}
+	}else if(n=='led2'){
+		if(m=='on'){
+		//ledstate2.innerHTML='on';
+		localStorage.led_state2='led2:on';
+		document.getElementById('led_state2').innerHTML=localStorage.led_state2;
+		ledstate2.innerHTML=localStorage.led_state2;	
+		}else{
+			//ledstate2.innerHTML='off';
+			localStorage.led_state2='led2:off';
+			document.getElementById('led_state2').innerHTML=localStorage.led_state2;
+			ledstate2.innerHTML=localStorage.led_state2;	
+		}
+	}else if(n=='led3'){
+		if(m=='on'){
+		//ledstate3.innerHTML='on';
+		localStorage.led_state3='led3:on';
+		document.getElementById('led_state3').innerHTML=localStorage.led_state3;
+		ledstate3.innerHTML=localStorage.led_state3;	
+		}else{
+			//ledstate3.innerHTML='off';
+			localStorage.led_state3='led3:off';
+		    document.getElementById('led_state3').innerHTML=localStorage.led_state3;
+			ledstate3.innerHTML=localStorage.led_state3;	
+		}
+	}else{val_sen.innerHTML=msg;}
+	
+    //n=msg.split(":")[0];
+	//f=msg.split(":")[1];
+	//v=msg.split(":")[2]
+	//boarId=document.getElementById("boarId").value;
+	//userId=document.getElementById("userId").value;
+	//if(boarId+userId==n){
+		///switch(msg) {
+		  //case 'led_state':
+		//	led_state=msg;
+		//	document.getElementById("led_state").innerHTML=led_state;
+		 //  break;
+		 //  case 'sensor_val':
+		//	sensor_val=msg;
+			//document.getElementById("sensor_val").innerHTML=sensor_val;
+			// code block
+		    //break;
+		//  default:
+			// code block
+		//}
+	   //}
+	 }
+  
+</script>
+	</body>
+</html>
+
